@@ -9,11 +9,19 @@ module BSG
   class ErrorException < StandardError
     attr_reader :errors
 
+<<<<<<< HEAD
     def initialize(errors)
       @errors = errors
     end
   end
   ENDPOINT = 'http://5.178.83.12'
+=======
+  #   def initialize(errors)
+  #     @errors = errors
+  #   end
+  # end
+  ENDPOINT = 'http://5.178.83.10'
+>>>>>>> 1f0ff5dd3d9afd55197125b3d759799a637d54d5
   class Client
       attr_reader :access_key
 
