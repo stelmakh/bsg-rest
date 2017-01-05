@@ -12,7 +12,7 @@ module BSG
   #     @errors = errors
   #   end
   # end
-  ENDPOINT = 'http://5.178.83.12'
+  ENDPOINT = 'http://5.178.83.10'
   class Client
       attr_reader :access_key
 
