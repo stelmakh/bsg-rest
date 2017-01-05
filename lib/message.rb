@@ -5,7 +5,7 @@ module BSG
   class MESSAGE < BSG::Base
     attr_accessor :error, :msisdn, :reference, :price, 
                   :destination, :id, :originator, :body, :validity, :phones,
-                  :task_id, :totalprice, :currency
+                  :task_id, :totalprice, :currency, :errorDescription
 
     def createdDatetime=(value)
       @createdDatetime = value_to_time(value)

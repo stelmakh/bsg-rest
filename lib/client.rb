@@ -1,17 +1,18 @@
 require 'json'
 require 'uri'
 require 'rest-client'
+require_relative 'error'
 require_relative 'hlr'
 require_relative 'message'
 
 module BSG
-  # class ErrorException < StandardError
-  #   attr_reader :errors
+  class ErrorException < StandardError
+    attr_reader :errors
 
-  #   def initialize(errors)
-  #     @errors = errors
-  #   end
-  # end
+    def initialize(errors)
+      @errors = errors
+    end
+  end
   ENDPOINT = 'http://5.178.83.12'
   class Client
       attr_reader :access_key
@@ -31,16 +32,20 @@ module BSG
         response = RestClient.get(url, headers)  if method == :get
         response = RestClient.post(url, "#{playload}", headers) if method == :post
 
+        # Parse the HTTP response.
         case response.code.to_i
-          when 200, 201, 204, 401, 404, 405, 422
-            resp = JSON.parse(response.body)
-            if resp.kind_of?(Array)
-              json = resp[0]
-            else
-              json = resp
-            end
-           end
-          json
+        when 200, 201, 204, 401, 404, 405, 422
+          json = JSON.parse(response.body)
+        else
+          raise Net::HTTPServerError.new response.http_version, 'Unknown response from server', response
+        end
+
+        # If the request returned errors, create Error objects and raise.
+        if json['error'].to_i != 0
+          raise ErrorException, [json].map { |e| Error.new(e) }
+        end
+
+        json
       end
 
       # =============================
