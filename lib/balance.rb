@@ -2,9 +2,8 @@ require 'time'
 require_relative 'base'
 
 module BSG
-  class MESSAGE < BSG::Base
-    attr_accessor :result, :currency, :totalprice, :price,
-                  :task_id
+  class BALANCE < BSG::Base
+    attr_accessor :error,:errorDescription, :currency, :amount, :limit
 
     def createdDatetime=(value)
       @createdDatetime = value_to_time(value)

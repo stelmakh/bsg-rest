@@ -4,24 +4,20 @@ require 'rest-client'
 require_relative 'error'
 require_relative 'hlr'
 require_relative 'message'
+require_relative 'im-viber'
+require_relative 'balance'
 
 module BSG
   class ErrorException < StandardError
     attr_reader :errors
 
-<<<<<<< HEAD
     def initialize(errors)
       @errors = errors
     end
   end
-  ENDPOINT = 'http://5.178.83.12'
-=======
-  #   def initialize(errors)
-  #     @errors = errors
-  #   end
-  # end
-  ENDPOINT = 'http://5.178.83.10'
->>>>>>> 1f0ff5dd3d9afd55197125b3d759799a637d54d5
+
+  ENDPOINT = 'http://api.bsg.hk'
+
   class Client
       attr_reader :access_key
 
@@ -30,7 +26,7 @@ module BSG
       end
 
       def request(method, path, params={})
-        url = URI.join(ENDPOINT, '/rest/', path).to_s
+        url = URI.join(ENDPOINT, '/v1.0/', path).to_s
 
         # Set up the HTTP object.
         headers = {:content_type => 'application/json', 'X-API-KEY' => "#{@access_key}"}
@@ -39,11 +35,10 @@ module BSG
         # Construct the HTTP GET or POST request.
         response = RestClient.get(url, headers)  if method == :get
         response = RestClient.post(url, "#{playload}", headers) if method == :post
-
         # Parse the HTTP response.
         case response.code.to_i
         when 200, 201, 204, 401, 404, 405, 422
-          json = JSON.parse(response.body)
+          json = JSON.parse(response.body.to_s)
         else
           raise Net::HTTPServerError.new response.http_version, 'Unknown response from server', response
         end
@@ -92,6 +87,8 @@ module BSG
           HLR.new(request(:get, "hlr/prices/#{tariff.to_s}"))
         end
       end
+
+
       # =============================
       #         BSG SMS API
       # =============================
@@ -108,6 +105,9 @@ module BSG
       def message(id)
         MESSAGE.new(request(:get, "sms/#{id.to_s}"))
       end
+      def message(reference)
+        MESSAGE.new(request(:get, "sms/reference/#{reference.to_s}"))
+      end
       # Retrieve the information of specific SMS task.
       def message_task(task_id)
         MESSAGE.new(request(:get, "sms/task/#{task_id.to_s}"))
@@ -118,6 +118,47 @@ module BSG
         MESSAGE.new(request(:post, "sms/create/",
           params.merge({})
         ))
+      end
+
+      # =============================
+      #         BSG IM VIBER API
+      # =============================
+
+      # Retrieve the prices of specific SMS tariff.
+      def viber_prices(tariff=nil)
+        if tariff.nil?
+          VIBER.new(request(:get, "viber/prices/"))
+        else
+          VIBER.new(request(:get, "viber/prices/#{tariff.to_s}"))
+        end
+      end
+      # Retrieve the information of specific SMS.
+      def viber(id)
+        VIBER.new(request(:get, "viber/#{id.to_s}"))
+      end
+       # Retrieve the information of specific SMS.
+      def viber_reference(reference)
+        VIBER.new(request(:get, "viber/reference/#{reference.to_s}"))
+      end
+      # Retrieve the information of specific SMS task.
+      def viber_task(task_id)
+        VIBER.new(request(:get, "viber/task/#{task_id.to_s}"))
+      end
+
+      # Create a new SMS.
+      def viber_create(params={})
+        VIBER.new(request(:post, "viber/create/",
+          params.merge({})
+        ))
+      end
+
+      # =============================
+      #         BSG BALANCE API
+      # =============================
+
+      # Retrieve balance amount
+      def balance()
+        BALANCE.new(request(:get, "common/balance"))
       end
 
   end
