@@ -2,8 +2,9 @@ require 'time'
 require_relative 'base'
 
 module BSG
-  class BALANCE < BSG::Base
-    attr_accessor :error,:errorDescription, :currency, :amount, :limit
+  class HLR < BSG::Base
+    attr_accessor :id, :reference, :msisdn, :network, :status, :details, :createdDatetime, :statusDatetime, :result,
+                  :error, :errorDescription
 
     def createdDatetime=(value)
       @createdDatetime = value_to_time(value)

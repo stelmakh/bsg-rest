@@ -5,7 +5,7 @@ Requirements
 
 Examples
 --------
-We have put some self-explanatory examples in the *examples* directory, but here is a quick breakdown on how it works. First, you need to create an instance of **BSG::Client**. Be sure to replace **YOUR_ACCESS_KEY** with something real in the bottom example.
+First, you need to create an instance of **BSG::Client**. Be sure to replace **YOUR_ACCESS_KEY** with something real in the bottom example.
 
 ```ruby
 require 'pp'              # Only needed for this example
@@ -25,7 +25,6 @@ pp client.message_create(destination: 'phone', originator: 'SENDER', body: 'mess
 #<BSG::MESSAGE:0x007faad71306f8
  @error=0,
  @id="172",
- @currency="EUR",
  @price="0.2300000",
  @currency="EUR">
 ```

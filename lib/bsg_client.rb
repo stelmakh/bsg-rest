@@ -1,21 +1,12 @@
 require 'json'
 require 'uri'
 require 'rest-client'
-require_relative 'error'
-require_relative 'hlr'
-require_relative 'message'
-require_relative 'im-viber'
-require_relative 'balance'
+require_relative 'response/hlr'
+require_relative 'response/message'
+require_relative 'response/im-viber'
+require_relative 'response/balance'
 
 module BSG
-  class ErrorException < StandardError
-    attr_reader :errors
-
-    def initialize(errors)
-      @errors = errors
-    end
-  end
-
   ENDPOINT = 'http://api.bsg.hk'
 
   class Client
@@ -31,21 +22,17 @@ module BSG
         # Set up the HTTP object.
         headers = {:content_type => 'application/json', 'X-API-KEY' => "#{@access_key}"}
         playload = params.to_json if method == :post && !params.empty?
-        
+
         # Construct the HTTP GET or POST request.
         response = RestClient.get(url, headers)  if method == :get
         response = RestClient.post(url, "#{playload}", headers) if method == :post
+
         # Parse the HTTP response.
         case response.code.to_i
         when 200, 201, 204, 401, 404, 405, 422
           json = JSON.parse(response.body.to_s)
         else
           raise Net::HTTPServerError.new response.http_version, 'Unknown response from server', response
-        end
-
-        # If the request returned errors, create Error objects and raise.
-        if json['error'].to_i != 0
-          raise ErrorException, [json].map { |e| Error.new(e) }
         end
 
         json
@@ -81,11 +68,7 @@ module BSG
 
       # Retrieve the prices of specific HLR tariff.
       def hlr_prices(tariff=nil)
-        if tariff.nil?
-          HLR.new(request(:get, "hlr/prices"))
-        else
-          HLR.new(request(:get, "hlr/prices/#{tariff.to_s}"))
-        end
+        HLR.new(request(:get, "hlr/prices/#{tariff.nil? ? '' : tariff.to_s}"))
       end
 
 
@@ -95,61 +78,47 @@ module BSG
 
       # Retrieve the prices of specific SMS tariff.
       def message_prices(tariff=nil)
-        if tariff.nil?
-          MESSAGE.new(request(:get, "sms/prices/"))
-        else
-          MESSAGE.new(request(:get, "sms/prices/#{tariff.to_s}"))
-        end
+        MESSAGE.new(request(:get, "sms/prices/#{tariff.nil? ? '' : tariff.to_s}"))
       end
       # Retrieve the information of specific SMS.
       def message(id)
         MESSAGE.new(request(:get, "sms/#{id.to_s}"))
       end
-      def message(reference)
+      def message_reference(reference)
         MESSAGE.new(request(:get, "sms/reference/#{reference.to_s}"))
       end
       # Retrieve the information of specific SMS task.
       def message_task(task_id)
         MESSAGE.new(request(:get, "sms/task/#{task_id.to_s}"))
       end
-
       # Create a new SMS.
       def message_create(params={})
-        MESSAGE.new(request(:post, "sms/create/",
-          params.merge({})
-        ))
+        MESSAGE.new(request(:post, "sms/create/", params.merge({})))
       end
 
       # =============================
       #         BSG IM VIBER API
       # =============================
 
-      # Retrieve the prices of specific SMS tariff.
+      # Retrieve the prices of specific Viber message tariff.
       def viber_prices(tariff=nil)
-        if tariff.nil?
-          VIBER.new(request(:get, "viber/prices/"))
-        else
-          VIBER.new(request(:get, "viber/prices/#{tariff.to_s}"))
-        end
+        VIBER.new(request(:get, "viber/prices/#{tariff.nil? ? '' : tariff.to_s}"))
       end
-      # Retrieve the information of specific SMS.
+      # Retrieve the information of specific Viber message.
       def viber(id)
         VIBER.new(request(:get, "viber/#{id.to_s}"))
       end
-       # Retrieve the information of specific SMS.
+       # Retrieve the information of specific Viber message.
       def viber_reference(reference)
         VIBER.new(request(:get, "viber/reference/#{reference.to_s}"))
       end
-      # Retrieve the information of specific SMS task.
+      # Retrieve the information of specific Viber message task.
       def viber_task(task_id)
         VIBER.new(request(:get, "viber/task/#{task_id.to_s}"))
       end
-
-      # Create a new SMS.
+      # Create a new Viber message.
       def viber_create(params={})
-        VIBER.new(request(:post, "viber/create/",
-          params.merge({})
-        ))
+        VIBER.new(request(:post, "viber/create/", params.merge({})))
       end
 
       # =============================
